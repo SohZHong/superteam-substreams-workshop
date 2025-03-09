@@ -1,0 +1,7 @@
+{
+  "generator": "sol-minimal",
+  "state": {
+    "name": "transaction_counter",
+    "chainName": ""
+  }
+}
