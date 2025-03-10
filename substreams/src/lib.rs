@@ -4,7 +4,7 @@ use substreams::store::{StoreAdd, StoreAddInt64, StoreGet, StoreGetInt64, StoreN
 use substreams_solana::pb::sf::solana::r#type::v1::{Block, ConfirmedTransaction};
 #[substreams::handlers::store]
 fn tx_counter(blk: Block, store: StoreAddInt64) {
-    let tx_count = blk.transactions.len() as i64;
+    let tx_count: i64 = blk.transactions.len() as i64;
 
     // Store transaction count with block slot as the key
     store.add(0, &blk.slot.to_string(), tx_count);
@@ -20,9 +20,9 @@ fn tx_counter_view(block: Block, store: StoreGetInt64) -> mydata::MyData {
     let count: i64 = store.get_last(&latest_slot).unwrap_or(0); // Default to 0 if no value exists
 
     // Extract block hash
-    let block_hash = block.blockhash.clone();
+    let block_hash: String = block.blockhash.clone();
 
-    let block_timestamp = block.block_time.unwrap().timestamp as u64;
+    let block_timestamp: u64 = block.block_time.unwrap().timestamp as u64;
    
     // Calculate instruction count from transactions
     let instructions_len: u64 = block
