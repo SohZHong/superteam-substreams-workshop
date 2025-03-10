@@ -1,15 +1,10 @@
 mod pb;
-use pb::mydata::v1 as mydata;
-
+use substreams::store::{StoreAdd, StoreAddInt64, StoreNew};
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
+#[substreams::handlers::store]
+fn tx_counter(blk: Block, store: StoreAddInt64) {
+    let tx_count = blk.transactions.len() as i64;
 
-#[substreams::handlers::map]
-fn map_my_data(blk: Block) -> mydata::MyData {
-    let mut my_data = mydata::MyData::default();
-    my_data.block_hash = blk.blockhash.to_string();
-    my_data.block_slot = blk.slot;
-    my_data.block_timestamp = blk.block_time.clone().unwrap_or_default().timestamp as u64;
-    my_data.transactions_len = blk.transactions.len() as u64;
-    my_data.instructions_len = blk.walk_instructions().count() as u64;
-    my_data
+    // Store transaction count with block slot as the key
+    store.add(0, &blk.slot.to_string(), tx_count);
 }

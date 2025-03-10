@@ -27,19 +27,18 @@ binaries:
     file: ./target/wasm32-unknown-unknown/release/substreams.wasm
 
 modules:
- - name: map_my_data
-   kind: map
-   inputs:
-   - map: solana:blocks_without_votes
-   output:
-    type: proto:mydata.v1.MyData
-  # For performance, you should use a blockFilter whenever possible, like this:
-  #
-  # blockFilter:
-  #  module: solana:program_ids_without_votes
-  #  query:
-  #      string: program:4vMsoUT2BWatFweudnQM1xedRLfJgJ7hswhcpz4xgBTy
-  #
-  # see https://substreams.dev/streamingfast/solana-common/latest for details
+  # Store module that counts transactions
+  - name: tx_counter
+    kind: store
+    initialBlock: 325320000
+    updatePolicy: add
+    valueType: int64
+    inputs:
+      - map: solana:blocks_without_votes # Received 'Block'
+    # Filter each block by Token program and Jupiter token
+    blockFilter:
+      module: solana:program_ids_and_accounts_without_votes
+      query:
+        string: (program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA && account:JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN)
 
 network: solana-mainnet-beta
