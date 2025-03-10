@@ -55,3 +55,17 @@ There are two options to start developing with substreams.
 
   > [!IMPORTANT]
   > Add `$HOME/go/bin` to the system path if it's not already present.
+
+### Validation of installation
+
+Run the [`substreams` CLI](https://docs.substreams.dev/reference-material/substreams-cli/command-line-interface) passing the `--version` flag to check the success of the installation.
+
+```bash
+substreams --version
+```
+
+A successful installation will print the version that you have installed.
+
+```bash
+substreams version dev
+```
