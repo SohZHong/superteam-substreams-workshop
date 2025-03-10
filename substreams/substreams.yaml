@@ -40,5 +40,19 @@ modules:
       module: solana:program_ids_and_accounts_without_votes
       query:
         string: (program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA && account:JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN)
+  # Map module that displays data from store module
+  - name: tx_counter_view
+    kind: map
+    initialBlock: 325320000
+    inputs:
+      - map: solana:blocks_without_votes # Received 'Block'
+      - store: tx_counter # Receive self defined store module
+        mode: get
+    blockFilter:
+      module: solana:program_ids_and_accounts_without_votes
+      query:
+        string: (program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA && account:JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN)
+    output:
+      type: proto:mydata.v1.MyData
 
 network: solana-mainnet-beta
