@@ -116,6 +116,7 @@ npx buf --version
 ```
 
 **3. Windows**
+
 You can install the Buf CLI using the [Scoop](https://scoop.sh/) installer for Windows:
 
 ```bash
@@ -129,4 +130,5 @@ scoop update buf
 ```
 
 **Binary**
+
 Buf offers Windows binaries for both the `x86_64` and `arm64` architectures. You can download the latest binaries from [GitHub Releases](https://github.com/bufbuild/buf/releases/latest).
