@@ -3,7 +3,7 @@ import {
   streamBlocks,
   createAuthInterceptor,
   createRegistry,
-  fetchSubstream,
+  createSubstream,
 } from '@substreams/core';
 import type { Package } from '@substreams/core/proto';
 import type { Transport, Interceptor } from '@connectrpc/connect';
@@ -16,25 +16,27 @@ import { Handlers } from './types';
 import {
   ENDPOINT,
   MODULE,
-  SPKG,
   START_BLOCK,
   STOP_BLOCK,
   TOKEN,
-} from './constants';
+} from './clientConstants';
 
 /*
     Entrypoint of the application.
     Because of the long-running connection, Substreams will disconnect from time to time.
     The application MUST handle disconnections and commit the provided cursor to avoid missing information.
 */
-export const startSubstreams = async (handlers: Handlers) => {
+export const startSubstreams = async (
+  handlers: Handlers,
+  spkgBuffer: Buffer<ArrayBufferLike>
+) => {
   if (!TOKEN) {
     throw new Error("Missing environment variable 'SUBSTREAMS_API_TOKEN'");
   }
 
-  const pkg: Package = await fetchPackage();
+  const pkg: Package = createSubstream(spkgBuffer);
   const registry: IMessageTypeRegistry = createRegistry(pkg);
-  const authInterceptor = createAuthInterceptor(TOKEN);
+  const authInterceptor: Interceptor = createAuthInterceptor(TOKEN);
 
   const transport = createConnectTransport({
     baseUrl: ENDPOINT,
@@ -66,9 +68,9 @@ export const startSubstreams = async (handlers: Handlers) => {
   }
 };
 
-const fetchPackage = async () => {
-  return await fetchSubstream(SPKG);
-};
+// const fetchPackage = async () => {
+//   return await fetchSubstream(SPKG);
+// };
 
 const stream = async (
   pkg: Package,
