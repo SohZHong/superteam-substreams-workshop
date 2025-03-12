@@ -63,10 +63,6 @@ export const startSubstreams = async (
   }
 };
 
-// const fetchPackage = async () => {
-//   return await fetchSubstream(SPKG);
-// };
-
 const stream = async (
   pkg: Package,
   registry: IMessageTypeRegistry,
