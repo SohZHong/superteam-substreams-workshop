@@ -168,13 +168,14 @@ export const STOP_BLOCK = '<STOP_BLOCK>';
 
 #### Explanation of Constants
 
-| Variable | Description |
-| `TOKEN` | API token (fetched from .env) |
-| `ENDPOINT` | Substreams endpoint for streaming Solana blockchain data e.g. 'https://mainnet.sol.streamingfast.io:443' |
-| `MODULE` | Name of the Substreams module to execute e.g. 'my_module' |
-| `SPKG` | Name of the .spkg package file used for the stream e.g. 'my_spkg.spkg' |
-| `START_BLOCK` | The starting block number for processing e.g. 325320000 |
-| `STOP_BLOCK` | The number of blocks to process (relative stop block) e.g. '+100' |
+| Variable      | Description                                                                                              |
+| ------------- | -------------------------------------------------------------------------------------------------------- |
+| `TOKEN`       | API token (fetched from .env)                                                                            |
+| `ENDPOINT`    | Substreams endpoint for streaming Solana blockchain data e.g. 'https://mainnet.sol.streamingfast.io:443' |
+| `MODULE`      | Name of the Substreams module to execute e.g. 'my_module'                                                |
+| `SPKG`        | Name of the .spkg package file used for the stream e.g. 'my_spkg.spkg'                                   |
+| `START_BLOCK` | The starting block number for processing e.g. 325320000                                                  |
+| `STOP_BLOCK`  | The number of blocks to process (relative stop block) e.g. '+100'                                        |
 
 ### 4. Running The Project
 
