@@ -13,19 +13,14 @@ import { getCursor } from './cursor';
 import { isErrorRetryable } from './error';
 import { handleResponseMessage } from './handlers';
 import { Handlers } from './types';
-import {
-  ENDPOINT,
-  MODULE,
-  START_BLOCK,
-  STOP_BLOCK,
-  TOKEN,
-} from './clientConstants';
+import { ENDPOINT, MODULE, START_BLOCK, STOP_BLOCK, TOKEN } from './constants';
 
 /*
     Entrypoint of the application.
     Because of the long-running connection, Substreams will disconnect from time to time.
     The application MUST handle disconnections and commit the provided cursor to avoid missing information.
 */
+
 export const startSubstreams = async (
   handlers: Handlers,
   spkgBuffer: Buffer<ArrayBufferLike>
@@ -81,7 +76,7 @@ const stream = async (
   const request = createRequest({
     substreamPackage: pkg,
     outputModule: MODULE,
-    productionMode: true,
+    productionMode: false,
     startBlockNum: START_BLOCK,
     stopBlockNum: STOP_BLOCK,
     startCursor: getCursor() ?? undefined,

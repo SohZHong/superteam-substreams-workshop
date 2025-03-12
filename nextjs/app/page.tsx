@@ -9,6 +9,7 @@ import { IMessageTypeRegistry } from '@bufbuild/protobuf';
 import { getCursor, writeCursor } from '@/substreams/cursor';
 import { startSubstreams } from '@/substreams/main';
 import { Handlers } from '@/substreams/types';
+import { SPKG } from '@/substreams/constants';
 
 export default function Home() {
   // Keep state of errors
@@ -83,22 +84,24 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const executeSubstreams = async () => {
-      try {
-        if (!spkg) throw new Error('SPKG File is not loaded');
-        console.log('Starting substreams');
-        await startSubstreams(createHandlers(), spkg);
-      } catch (e) {
-        setError(e);
-        console.log(e);
-      }
-    };
+    // const executeSubstreams = async () => {
+    //   try {
+    //     if (!spkg) throw new Error('SPKG File is not loaded');
+    //     console.log('Starting substreams');
+    //     await startSubstreams(createHandlers(), spkg);
+    //   } catch (e) {
+    //     setError(e);
+    //     console.log(e);
+    //   }
+    // };
 
     const fetchSpkg = async () => {
       try {
-        const response = await fetch('/api/spkg');
+        const response = await fetch(`/spkgs/${SPKG}`);
         const arrayBuffer = await response.arrayBuffer();
         setSpkg(Buffer.from(arrayBuffer));
+        console.log('Substreams: ', Buffer.from(arrayBuffer));
+        await startSubstreams(createHandlers(), Buffer.from(arrayBuffer));
       } catch (error) {
         console.error('Failed to fetch SPKG:', error);
       }
@@ -107,7 +110,7 @@ export default function Home() {
     fetchSpkg();
 
     setCursor(getCursor() ?? undefined);
-    executeSubstreams();
+    // executeSubstreams();
 
     return () => {
       console.log('Stopping substreams (component unmounted)');
@@ -119,9 +122,7 @@ export default function Home() {
       {error != null && <div>{JSON.stringify(error)}</div>}
       {error == null && (
         <>
-          <h3>
-            Consuming Substreams package <i>{spkg}</i>
-          </h3>
+          <h3>Consuming Substreams package</h3>
           <div>
             <h4>Last Committed Cursor:</h4> <i>{cursor ?? <>-</>}</i>
             <h4>Blocks:</h4>
