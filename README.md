@@ -133,56 +133,18 @@ scoop update buf
 
 Buf offers Windows binaries for both the `x86_64` and `arm64` architectures. You can download the latest binaries from [GitHub Releases](https://github.com/bufbuild/buf/releases/latest).
 
-## Getting Started
+## Getting Started with Substreams
 
-### 1. Install the dependencies:
+## Further Exploration
 
-Make sure you have [Bun](https://bun.sh/) installed, then run:
+This [repository](http://github.com/streamingfast/substreams-sink-examples) contains several examples of production-ready sink applications to consume Substreams package.
 
-```bash
-bun install
-```
+The Go and JavaScript/TypeScript examples found below uses officially supported SDK(s) while Python and Rust examples are self-contained and you are expected to use the example as a base for your own sink, those examples are not re-usable libraries.
 
-### 2. Set Up Environment Variables
-
-- Copy `.env.example` and rename it to `.env`
-- Obtain your **Substreams API Token** from [The Graph Market](https://thegraph.market/dashboard?state=onboarding).
-- Update the `.env` file:
-
-```env
-SUBSTREAMS_API_TOKEN=your_api_token_here
-```
-
-### 3. Configure Substreams Constants
-
-Open the `constants.ts` file. This file contains all the necessary configuration variables for the Substreams integration. Update the fields to match your requirements:
-
-```typescript
-export const TOKEN: string = process.env.SUBSTREAMS_API_TOKEN || '';
-export const ENDPOINT = '<YOUR_ENDPOINT>';
-export const MODULE = '<YOUR_MODULE>';
-export const SPKG = '<LOCAL_SPKG_FILE>';
-export const START_BLOCK = <START_BLOCK>;
-export const STOP_BLOCK = '<STOP_BLOCK>';
-```
-
-#### Explanation of Constants
-
-| Variable      | Description                                                                                              |
-| ------------- | -------------------------------------------------------------------------------------------------------- |
-| `TOKEN`       | API token (fetched from .env)                                                                            |
-| `ENDPOINT`    | Substreams endpoint for streaming Solana blockchain data e.g. 'https://mainnet.sol.streamingfast.io:443' |
-| `MODULE`      | Name of the Substreams module to execute e.g. 'my_module'                                                |
-| `SPKG`        | Name of the .spkg package file used for the stream e.g. 'my_spkg.spkg'                                   |
-| `START_BLOCK` | The starting block number for processing e.g. 325320000                                                  |
-| `STOP_BLOCK`  | The number of blocks to process (relative stop block) e.g. '+100'                                        |
-
-### 4. Running The Project
-
-Start the Next.js development server:
-
-```bash
-bun run dev
-```
-
-Then, open http://localhost:3000 in your browser to see the real-time blockchain data streaming.
+- [Go](https://github.com/streamingfast/substreams-sink-examples/blob/master/go/README.md)
+- [JavaScript](https://github.com/streamingfast/substreams-sink-examples/blob/master/javascript/README.md)
+  - [NodeJS](https://github.com/streamingfast/substreams-sink-examples/blob/master/javascript/node/README.md)
+  - [Web](https://github.com/streamingfast/substreams-sink-examples/blob/master/javascript/web/README.md)
+- [Python](https://github.com/streamingfast/substreams-sink-examples/blob/master/python/README.md)
+- [Rust](https://github.com/streamingfast/substreams-sink-examples/blob/master/rust/README.md)
+- [Substreams Subgraph Triggers](https://github.com/streamingfast/substreams-sink-examples/blob/master/subgraph-triggers/README.md)
