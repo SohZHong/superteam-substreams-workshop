@@ -11,7 +11,7 @@ There are two options to start developing with substreams.
 - Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - Install [VSCode](https://code.visualstudio.com/download)
 - Install the [Devcontainer Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) in VSCode
-- Open this repository, and execute "Rebuild & open in container"
+- Open [this repository](https://github.com/streamingfast/substreams-starter), and execute "Rebuild & open in container"
 
 #### Included in the dev environment
 
