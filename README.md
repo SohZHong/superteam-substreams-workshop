@@ -72,7 +72,7 @@ A successful installation will print the version that you have installed.
 substreams version dev
 ```
 
-### Developer Dependencies
+### Developer Dependencies (Not Needed with Docker)
 
 #### Rust Dependencies Installation
 
@@ -133,7 +133,58 @@ scoop update buf
 
 Buf offers Windows binaries for both the `x86_64` and `arm64` architectures. You can download the latest binaries from [GitHub Releases](https://github.com/bufbuild/buf/releases/latest).
 
-## Getting Started with Substreams
+## Substreams Integration With NextJS
+
+### **1. Install Dependencies**
+
+Make sure you have [Bun](https://bun.sh/) installed, then run:
+
+```bash
+bun install
+```
+
+### **2. Set Up Environment Variables**
+
+- Rename your `.env.example` file to `.env`.
+- Copy your **Substreams API Token** and update the file:
+
+```bash
+SUBSTREAMS_API_TOKEN=your_api_token_here
+```
+
+### **3. Configure Substreams Constants**
+
+Open the `constants.ts` file. This file contains all the necessary configuration variables for the Substreams integration.
+
+```typescript
+export const TOKEN: string = process.env.SUBSTREAMS_API_TOKEN || '';
+export const ENDPOINT = 'https://mainnet.sol.streamingfast.io:443';
+export const MODULE = 'your_module';
+export const SPKG = 'your-spkg-file-v0.1.0.spkg';
+export const START_BLOCK = 325320000;
+export const STOP_BLOCK = '+100';
+```
+
+#### Explanation of constants
+
+| Variable      | Description                                           |
+| ------------- | ----------------------------------------------------- |
+| `TOKEN`       | API Token (fetched from `.env`)                       |
+| `ENDPOINT`    | Substreams endpoint for streaming blockchain data     |
+| `MODULE`      | Name of the Substreams module to execute              |
+| `SPKG`        | Name of the `.spkg` package file used for the stream  |
+| `START_BLOCK` | The starting block number for processing              |
+| `STOP_BLOCK`  | The number of blocks to process (relative stop block) |
+
+### **4. Starting the Project**
+
+Start the Next.js development server:
+
+```bash
+bun dev
+```
+
+Then, open `http://localhost:3000` in your browser to see the real-time blockchain data streaming.
 
 ## Further Exploration
 
