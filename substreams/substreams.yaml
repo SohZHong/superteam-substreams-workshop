@@ -1,0 +1,57 @@
+specVersion: v0.1.0
+package:
+  name: test_project
+  version: v0.1.0
+
+imports:
+  solana: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
+protobuf:
+  files:
+    - mydata.proto
+  importPaths:
+    - ./proto
+  excludePaths:
+    - sf/substreams/rpc
+    - sf/substreams/v1
+    - sf/substreams/sink
+    - sf/substreams/index
+    - sf/substreams/index/v1
+    - instructions.proto # sol.instructions.v1 from the v0.2.0 spkg
+    - transactions.proto # sol.transactions.v1 from the v0.2.0 spkg
+    - google
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: tx_store
+    kind: store
+    initialBlock: 328219000
+    updatePolicy: add
+    valueType: int64
+    inputs:
+      - map: solana:blocks_without_votes
+    blockFilter:
+      module: solana:program_ids_and_accounts_without_votes
+      query:
+        string: program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA && account:JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN
+  - name: map_my_data
+    kind: map
+    initialBlock: 328219000
+    inputs:
+      - map: solana:blocks_without_votes
+      - store: tx_store
+    output:
+      type: proto:mydata.v1.MyData
+    # For performance, you should use a blockFilter whenever possible, like this:
+    blockFilter:
+      module: solana:program_ids_and_accounts_without_votes
+      query:
+        string: program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA && account:JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN
+    #
+    # see https://substreams.dev/streamingfast/solana-common/latest for details
+
+network: solana-mainnet-beta

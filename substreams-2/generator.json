@@ -1,0 +1,11 @@
+{
+  "generator": "sol-transactions",
+  "state": {
+    "name": "token_tracker",
+    "chainName": "",
+    "initialBlock": 328219485,
+    "initialBlockSet": true,
+    "filter": "program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA \u0026\u0026 (account:Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB || account:JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN)",
+    "filterContainsAccount": true
+  }
+}
