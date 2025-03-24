@@ -152,12 +152,45 @@ bun install
 SUBSTREAMS_API_TOKEN=your_api_token_here
 ```
 
+### **3. Configure Substreams Constants**
+
+Open the `constants.ts` file. This file contains all the necessary configuration variables for the Substreams integration.
+
+```typescript
+export const TOKEN: string = process.env.SUBSTREAMS_API_TOKEN || '';
+export const ENDPOINT = 'https://mainnet.sol.streamingfast.io:443';
+export const MODULE = 'your_module';
+export const SPKG = 'your-spkg-file-v0.1.0.spkg';
+export const START_BLOCK = 325320000;
+export const STOP_BLOCK = '+100';
+```
+
+#### Explanation of constants
+
+| Variable      | Description                                           |
+| ------------- | ----------------------------------------------------- |
+| `TOKEN`       | API Token (fetched from `.env`)                       |
+| `ENDPOINT`    | Substreams endpoint for streaming blockchain data     |
+| `MODULE`      | Name of the Substreams module to execute              |
+| `SPKG`        | Name of the `.spkg` package file used for the stream  |
+| `START_BLOCK` | The starting block number for processing              |
+| `STOP_BLOCK`  | The number of blocks to process (relative stop block) |
+
+### **4. Starting the Project**
+
+Start the Next.js development server:
+
+```bash
+bun dev
+```
+
+Then, open `http://localhost:3000` in your browser to see the real-time blockchain data streaming.
+
 ## Viewing Substreams Output
 
 While following the steps below, any time you want to test your output, you can follow these steps to generate the necessary files, authenticate, and launch the Substreams GUI to view your results.
 
-[!NOTE]
-
+> [!NOTE]
 > After authentication, just run `substreams protogen`, `substreams build`, `substreams gui` commands in order to view your results
 
 #### 1. Generate Protobuf Code
@@ -201,40 +234,6 @@ Copy the auth token and paste it into the CLI. Once done, you'll see the followi
 ![Auth_Done](./readme-images/Auth_Done.png)
 
 After authenticating, run `substreams gui` and press `Enter` to see your output.
-
-### **3. Configure Substreams Constants**
-
-Open the `constants.ts` file. This file contains all the necessary configuration variables for the Substreams integration.
-
-```typescript
-export const TOKEN: string = process.env.SUBSTREAMS_API_TOKEN || '';
-export const ENDPOINT = 'https://mainnet.sol.streamingfast.io:443';
-export const MODULE = 'your_module';
-export const SPKG = 'your-spkg-file-v0.1.0.spkg';
-export const START_BLOCK = 325320000;
-export const STOP_BLOCK = '+100';
-```
-
-#### Explanation of constants
-
-| Variable      | Description                                           |
-| ------------- | ----------------------------------------------------- |
-| `TOKEN`       | API Token (fetched from `.env`)                       |
-| `ENDPOINT`    | Substreams endpoint for streaming blockchain data     |
-| `MODULE`      | Name of the Substreams module to execute              |
-| `SPKG`        | Name of the `.spkg` package file used for the stream  |
-| `START_BLOCK` | The starting block number for processing              |
-| `STOP_BLOCK`  | The number of blocks to process (relative stop block) |
-
-### **4. Starting the Project**
-
-Start the Next.js development server:
-
-```bash
-bun dev
-```
-
-Then, open `http://localhost:3000` in your browser to see the real-time blockchain data streaming.
 
 ## Using Store Modules in Substreams
 
@@ -318,8 +317,7 @@ message MyData {
 }
 ```
 
-[!IMPORTANT]
-
+> [!IMPORTANT]
 > When you're done verifying, please enter `substreams protogen` to generate the protobuf bindings.
 
 #### Why This Change?
@@ -386,8 +384,7 @@ The output should be similar to the following:
 
 ![Substreams_2_Output](./readme-images/Substreams_1_Outcome.png)
 
-[!IMPORTANT]
-
+> [!IMPORTANT]
 > Refer to [this section](#viewing-substreams-output) if it's your first time viewing the results
 
 ## Tracking Token Transactions with Substreams on Solana
@@ -450,8 +447,7 @@ params:
 
 You can also check out the complete file [here](./substreams-2/substreams.yaml) for comments on understanding what each configuration does.
 
-[!IMPORTANT]
-
+> [!IMPORTANT]
 > When you're done verifying, please enter `substreams protogen` to generate the protobuf bindings.
 
 ### 3. Modifying Substreams Output
@@ -594,8 +590,7 @@ The output should be similar to the following:
 
 ![Substreams_2_Output](./readme-images/Substreams_2_Outcome.png)
 
-[!IMPORTANT]
-
+> [!IMPORTANT]
 > Refer to [this section](#viewing-substreams-output) if it's your first time viewing the results
 
 ## Further Exploration
