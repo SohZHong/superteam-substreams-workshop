@@ -236,6 +236,160 @@ bun dev
 
 Then, open `http://localhost:3000` in your browser to see the real-time blockchain data streaming.
 
+## Using Store Modules in Substreams
+
+In this section, we will modify our Substreams pipeline to introduce store modules, which allow us to persist and retrieve data across blocks efficiently. This guide will walk you through:
+
+1. Updating the `substreams.yaml` file to define a store module (`tx_store`) that counts transactions.
+2. Modifying `mydata.proto` to include a new field for storing transaction counts.
+3. Adjusting the Rust code to read from the store.
+
+### Step 1: Initialize a New Substreams Package
+
+First, set up a new Substreams package using `substreams init` in the CLI with the below options:
+
+1. Protocol - Select the **`Solana`** protocol
+2. Type - Select **`sol-minimal`** to get the entire block
+3. Project Name - Any will do.
+
+### 2. Updating `substreams.yaml`
+
+To track transaction counts, we need to define a store module in our substreams.yaml file. Modify the modules section as follows:
+
+```yaml
+modules:
+  - name: tx_store
+    kind: store
+    initialBlock: 328219000
+    updatePolicy: add
+    valueType: int64
+    inputs:
+      - map: solana:blocks_without_votes
+    blockFilter:
+      module: solana:program_ids_and_accounts_without_votes
+      query:
+        string: program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA && account:JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN
+
+  - name: map_my_data
+    kind: map
+    initialBlock: 328219000
+    inputs:
+      - map: solana:blocks_without_votes
+      - store: tx_store
+    output:
+      type: proto:mydata.v1.MyData
+    blockFilter:
+      module: solana:program_ids_and_accounts_without_votes
+      query:
+        string: program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA && account:JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN
+```
+
+You can also check out the complete file [here](./substreams-2/substreams.yaml) for comments on understanding what each configuration does.
+
+#### What Changed?
+
+1. Created a Store Module (`tx_store`)
+
+- Tracks the number of transactions per block.
+- Uses `updatePolicy: add`, meaning values are accumulated over time.
+- Filters transactions related to the Solana Token Program and the JUP token.
+
+2. Modified `map_my_data` to Read from the Store
+
+- Takes `tx_store` as an input.
+- Uses a block filter for performance optimization.
+
+### 3. Modifying mydata.proto
+
+Next, update the proto/mydata.proto file to include a new field for storing transaction counts. Replace the contents with:
+
+```proto
+syntax = "proto3";
+
+package mydata.v1;
+
+message MyData {
+  string block_hash = 1;
+  uint64 block_slot = 2;
+  uint64 block_timestamp = 3;
+  uint64 transactions_len = 4;
+  uint64 instructions_len = 5;
+  uint64 store_transaction_val = 6;
+}
+```
+
+[!IMPORTANT]
+
+> When you're done verifying, please enter `substreams protogen` to generate the protobuf bindings.
+
+#### Why This Change?
+
+- We added `store_transaction_val` to hold the transaction count retrieved from `tx_store`.
+- This ensures that our output includes aggregated transaction counts over time.
+
+### 4. Implementing the Store Module in Rust
+
+Now, modify lib.rs to:
+
+1. Define the store module (`tx_store`) that keeps track of transaction counts.
+2. Modify `map_my_data` to read from `tx_store`.
+
+```rust
+mod pb;
+use pb::mydata::v1 as mydata;
+use substreams::store::{StoreAddInt64, StoreGetInt64};
+use substreams_solana::pb::sf::solana::r#type::v1::Block;
+
+#[substreams::handlers::store]
+fn tx_store(blk: Block, store: StoreAddInt64) {
+    for tx in blk.transactions {
+        if let Some(confirmed_tx) = &tx.transaction {
+            store.add(0, confirmed_tx.id(), 1);
+        }
+    }
+}
+
+#[substreams::handlers::map]
+fn map_my_data(blk: Block, store: StoreGetInt64) -> mydata::MyData {
+    let mut my_data = mydata::MyData::default();
+    my_data.block_hash = blk.blockhash.to_string();
+    my_data.block_slot = blk.slot;
+    my_data.block_timestamp = blk.block_time.clone().unwrap_or_default().timestamp as u64;
+    my_data.transactions_len = blk.transactions.len() as u64;
+    my_data.instructions_len = blk.walk_instructions().count() as u64;
+
+    let mut total_tx_count: i64 = 0;
+    for tx in blk.transactions {
+        let tx_count = store.get_at(0, tx.id()).unwrap_or(0);
+        total_tx_count += tx_count;
+    }
+    my_data.store_transaction_val = total_tx_count as u64;
+
+    my_data
+}
+```
+
+#### Explanation
+
+- **`tx_store` Function**
+  - Iterates through transactions and increments a count for each confirmed transaction.
+  - Uses `store.add(0, confirmed_tx.id(), 1)` to store values with `updatePolicy: add`.
+- **`map_my_data` Function**
+  - Reads transaction counts from the store using `store.get_at(0, tx.id())`.
+  - Aggregates the total count into `store_transaction_val`.
+
+### 5. Testing the Output
+
+Once you're done with modifying `lib.rs`, run `substreams build` and `substreams gui` to view your results.
+
+The output should be similar to the following:
+
+![Substreams_2_Output](./readme-images/Substreams_1_Outcome.png)
+
+[!IMPORTANT]
+
+> Refer to [this section](#viewing-substreams-output) if it's your first time viewing the results
+
 ## Tracking Token Transactions with Substreams on Solana
 
 To begin using Substreams for tracking token transactions on Solana, we first set up a Substreams module that processes blockchain data efficiently. This involves:
@@ -439,6 +593,10 @@ Once you're done with modifying `lib.rs`, run `substreams build` and `substreams
 The output should be similar to the following:
 
 ![Substreams_2_Output](./readme-images/Substreams_2_Outcome.png)
+
+[!IMPORTANT]
+
+> Refer to [this section](#viewing-substreams-output) if it's your first time viewing the results
 
 ## Further Exploration
 
