@@ -152,6 +152,56 @@ bun install
 SUBSTREAMS_API_TOKEN=your_api_token_here
 ```
 
+## Viewing Substreams Output
+
+While following the steps below, any time you want to test your output, you can follow these steps to generate the necessary files, authenticate, and launch the Substreams GUI to view your results.
+
+[!NOTE]
+
+> After authentication, just run `substreams protogen`, `substreams build`, `substreams gui` commands in order to view your results
+
+#### 1. Generate Protobuf Code
+
+Before compiling the Rust code, run the following command to generate the Rust Protobuf definitions from the .proto files:
+
+```bash
+substreams protogen
+```
+
+#### 2. Build the Substreams Module
+
+Next, compile the Rust code into a WebAssembly (.wasm) binary using:
+
+```bash
+substreams build
+```
+
+#### 3. Authenticate with StreamingFast
+
+To interact with the Solana blockchain using Substreams, authenticate with StreamingFast:
+
+```bash
+substreams auth
+```
+
+You will get the following prompt:
+
+![CLI Auth](./readme-images/Graph_Auth.png)
+
+Click on the link and you will be navigated to a page like this (If you don't have an account):
+
+![Register_Screen](./readme-images/Register.png)
+
+Register through whichever method you see fit. You will see the below page once done:
+
+![Copy_Token](./readme-images/Copy_Token.png)
+
+Copy the auth token and paste it into the CLI. Once done, you'll see the following output:
+
+![Auth_Done](./readme-images/Auth_Done.png)
+
+After authenticating, run `substreams gui` and press `Enter` to see your output.
+
 ### **3. Configure Substreams Constants**
 
 Open the `constants.ts` file. This file contains all the necessary configuration variables for the Substreams integration.
@@ -185,6 +235,210 @@ bun dev
 ```
 
 Then, open `http://localhost:3000` in your browser to see the real-time blockchain data streaming.
+
+## Tracking Token Transactions with Substreams on Solana
+
+To begin using Substreams for tracking token transactions on Solana, we first set up a Substreams module that processes blockchain data efficiently. This involves:
+
+### Step 1: Initialize a New Substreams Package
+
+First, set up a new Substreams package using `substreams init` in the CLI with the below options:
+
+1. Protocol - Select the **`Solana`** protocol
+2. Type - Select **`sol-transactions`** to get filtered transactions only
+3. Project Name - Any will do.
+4. Initial Block - The starting block where you want to start indexing at. Any will do.
+5. Transaction Filter - Remove the default option and paste the following below:
+
+```bash
+program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA && (account:Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB || account:JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN)
+```
+
+#### What This Filter Does
+
+The filter ensures that Substreams processes only relevant transactions by applying the following conditions:
+
+1. **`program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`**
+
+- This specifies that we only care about transactions related to the Solana Token Program (SPL tokens).
+- The Token Program is responsible for all standard token transfers on Solana.
+
+2. **`(account:Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB || account:JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN)`**
+
+- This further narrows the scope to transactions involving specific tokens:
+  - USDT (Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB)
+  - JUP (JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN)
+
+This means that only transactions **where either of these tokens is transferred** will be processed.
+
+### 2. Verifying Yaml File
+
+If initialized correctly, you should be seeing something like this in the `substreams.yaml` file:
+
+```yaml
+modules:
+  - name: map_filtered_transactions
+    use: solana:transactions_by_programid_and_account_without_votes
+    initialBlock: <YOUR-INITIAL-BLOCK>
+
+  - name: map_my_data
+    kind: map
+    inputs:
+      - map: map_filtered_transactions
+    output:
+      type: proto:mydata.v1.MyData
+
+network: solana-mainnet-beta
+
+params:
+  map_filtered_transactions: program:TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA && (account:Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB || account:JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN)
+```
+
+You can also check out the complete file [here](./substreams-2/substreams.yaml) for comments on understanding what each configuration does.
+
+[!IMPORTANT]
+
+> When you're done verifying, please enter `substreams protogen` to generate the protobuf bindings.
+
+### 3. Modifying Substreams Output
+
+Before implementing the Rust logic, you need to modify the `mydata.proto` file located in the `proto/` folder. This file defines the structure of the data that your Substreams module will output.
+
+1. Replace the contents of proto/mydata.proto with the following:
+
+```proto
+syntax = "proto3";
+
+package mydata.v1;
+
+import "sf/solana/type/v1/type.proto";
+
+message MyData {
+  repeated .sf.solana.type.v1.ConfirmedTransaction jup = 1;
+  repeated .sf.solana.type.v1.ConfirmedTransaction usdt = 2;
+}
+```
+
+2. When you're done, run `substreams protogen` to generate the protobuf bindings
+
+#### What It Does
+
+- `syntax = "proto3"`; → Specifies that this file uses Protocol Buffers v3.
+- `package mydata.v1` → Defines the package namespace for this data structure.
+- `import "sf/solana/type/v1/type.proto"` → Imports Solana’s predefined protobuf types, allowing us to use `ConfirmedTransaction`.
+- `message MyData {}` → Defines a structured format for storing transactions.
+  - `repeated .sf.solana.type.v1.ConfirmedTransaction jup = 1`
+    - Stores all transactions involving the JUP token.
+  - `repeated .sf.solana.type.v1.ConfirmedTransaction usdt = 2`
+    - Stores all transactions involving the USDT token.
+
+### 4. Implementing the Data Processing Logic
+
+To extract and process JUP and USDT token transactions, modify lib.rs by adding the following code snippets. Each section explains what the code does.
+
+#### 1. Import Required Modules
+
+Add the necessary imports for working with Solana transactions and your protobuf definition
+
+```rust
+mod pb;
+use pb::{mydata::v1 as mydata, sf::substreams::solana::v1::Transactions};
+use pb::sf::solana::r#type::v1::{ConfirmedTransaction, InnerInstruction, InnerInstructions, Transaction};
+```
+
+This imports essential modules needed for handling transaction data.
+
+#### 2. Define Token Addresses
+
+Declare constants for the token addresses you want to track:
+
+```rust
+const JUP_TOKEN: &str = "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN";
+const USDT_TOKEN: &str = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
+```
+
+This ensures that your code consistently refers to the correct token addresses.
+
+#### 3. Map Transactions to Extract Relevant Data
+
+Define a `map_my_data` function to filter and collect transactions involving JUP and USDT:
+
+```rust
+#[substreams::handlers::map]
+fn map_my_data(transactions: Transactions) -> mydata::MyData {
+    let mut my_data: mydata::MyData = mydata::MyData::default(); // Initialize MyData struct
+
+    // Filter transactions that involve JUP token transfers
+    my_data.jup = transactions
+        .transactions
+        .iter()
+        .filter(|tx: &&ConfirmedTransaction| contains_transfer(*tx, JUP_TOKEN))
+        .cloned()
+        .collect();
+
+    // Filter transactions that involve USDT token transfers
+    my_data.usdt = transactions
+        .transactions
+        .iter()
+        .filter(|tx: &&ConfirmedTransaction| contains_transfer(*tx, USDT_TOKEN))
+        .cloned()
+        .collect();
+
+    my_data // Return the populated MyData struct
+}
+```
+
+This function processes transactions, filters out those that involve JUP or USDT, and stores them in MyData.
+
+#### 4. Check if a Transaction Contains a Token Transfer
+
+Define a helper function that scans transactions to see if they involve a specific token:
+
+```rust
+fn contains_transfer(tx: &ConfirmedTransaction, token: &str) -> bool {
+    let Some(meta) = &tx.meta else { return false };
+
+    // Iterate over all inner instructions and check if any represent a token transfer
+    meta.inner_instructions
+        .iter()
+        .flat_map(|i: &InnerInstructions| &i.instructions)
+        .any(|instr: &InnerInstruction| is_token_transfer(instr, tx, token));
+
+    return true; // This line should be fixed to return false if no transfer is found.
+}
+```
+
+This function looks through a transaction’s metadata to determine if it includes a transfer of the specified token.
+
+#### 5. Verify If an Instruction Represents a Token Transfer
+
+Finally, define the logic that checks if a specific instruction involves the token:
+
+```rust
+fn is_token_transfer(instr: &InnerInstruction, tx: &ConfirmedTransaction, token: &str) -> bool {
+    let Some(message) = tx.transaction.as_ref().and_then(|t: &Transaction| t.message.as_ref()) else {
+        return false;
+    };
+    let token_bytes: &[u8] = token.as_bytes(); // Convert token address to bytes
+
+    // Check if any account in the instruction matches the token address
+    instr.accounts.iter().any(|&index| {
+        message.account_keys.get(index as usize)
+            .map(|key: &Vec<u8>| key == token_bytes)
+            .unwrap_or(false)
+    })
+}
+```
+
+This function ensures that each instruction is checked against the token address to confirm if it’s a transfer.
+
+#### 5. Testing the Output
+
+Once you're done with modifying `lib.rs`, run `substreams build` and `substreams gui` to view your results.
+
+The output should be similar to the following:
+
+![Substreams_2_Output](./readme-images/Substreams_2_Outcome.png)
 
 ## Further Exploration
 
