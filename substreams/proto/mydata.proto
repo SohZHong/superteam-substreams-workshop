@@ -8,5 +8,9 @@ message MyData {
   uint64 block_timestamp = 3;
   uint64 transactions_len = 4;
   uint64 instructions_len = 5;
+
+  // The total number of transactions counted from the Substreams store.
+  // This value is derived from the `tx_store` module, which increments 
+  // the count for each confirmed transaction found in the block.
   uint64 store_transaction_val = 6;
 }
